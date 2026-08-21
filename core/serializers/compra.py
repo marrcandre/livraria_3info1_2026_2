@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework.serializers import (
     CharField,
     DecimalField,
@@ -6,6 +7,16 @@ from rest_framework.serializers import (
 )
 
 from core.models import Compra, ItensCompra
+
+# ====================================================================
+# Itens Compra
+# ====================================================================
+
+
+class ItensCompraCreateUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = ItensCompra
+        fields = ('livro', 'quantidade')
 
 
 class ItensCompraSerializer(ModelSerializer):
@@ -27,6 +38,26 @@ class ItensCompraSerializer(ModelSerializer):
     class Meta:
         model = ItensCompra
         fields = ('id', 'titulo', 'editora', 'quantidade', 'preco', 'total', 'capa')
+
+
+# ====================================================================
+# Compra
+# ====================================================================
+
+class CompraCreateUpdateSerializer(ModelSerializer):
+    itens = ItensCompraCreateUpdateSerializer(many=True)
+
+    class Meta:
+        model = Compra
+        fields = ('id', 'usuario', 'itens')
+
+    @transaction.atomic
+    def create(self, validated_data):
+        itens = validated_data.pop('itens')
+        compra = Compra.objects.create(**validated_data)
+        for item in itens:
+            ItensCompra.objects.create(compra=compra, **item)
+        return compra
 
 
 class CompraSerializer(ModelSerializer):
