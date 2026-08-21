@@ -59,6 +59,15 @@ class CompraCreateUpdateSerializer(ModelSerializer):
             ItensCompra.objects.create(compra=compra, **item)
         return compra
 
+    @transaction.atomic
+    def update(self, compra, validated_data):
+        itens = validated_data.pop('itens', None)
+        if itens is not None:
+            compra.itens.all().delete()
+            for item in itens:
+                ItensCompra.objects.create(compra=compra, **item)
+        return super().update(compra, validated_data)
+
 
 class CompraSerializer(ModelSerializer):
     usuario = CharField(source='usuario.email', read_only=True)
