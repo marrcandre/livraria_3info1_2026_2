@@ -6,6 +6,7 @@ from core.serializers import LivroListSerializer, LivroRetrieveSerializer, Livro
 
 class LivroViewSet(ModelViewSet):
     queryset = Livro.objects.order_by('-id')
+    serializer_class = LivroSerializer
 
     def get_serializer_class(self):
         if self.action == 'list':

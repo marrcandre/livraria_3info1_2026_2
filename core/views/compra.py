@@ -10,6 +10,7 @@ from core.serializers import (
 
 class CompraViewSet(ModelViewSet):
     queryset = Compra.objects.order_by("-id")
+    serializer_class = CompraSerializer
 
     def get_serializer_class(self):
         if self.action == 'list':
