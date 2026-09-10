@@ -19,7 +19,7 @@ from core.models import Compra, ItensCompra
 class ItensCompraCreateUpdateSerializer(ModelSerializer):
     class Meta:
         model = ItensCompra
-        fields = ('livro', 'quantidade')
+        fields = ('livro', 'quantidade', 'preco')
 
     def validate_quantidade(self, quantidade):
         if quantidade <= 0:
@@ -37,24 +37,19 @@ class ItensCompraListSerializer(ModelSerializer):
 
     class Meta:
         model = ItensCompra
-        fields = ('quantidade', 'livro')
+        fields = ('livro', 'quantidade', 'preco')
 
 
 class ItensCompraSerializer(ModelSerializer):
     titulo = CharField(source='livro.titulo', read_only=True)
     editora = CharField(source='livro.editora.nome', read_only=True)
-    preco = DecimalField(
-        source='livro.preco',
-        max_digits=7,
-        decimal_places=2,
-        read_only=True,
-    )
+
     capa = CharField(source='livro.capa.url', read_only=True)
 
     total = SerializerMethodField()
 
     def get_total(self, item):
-        return item.livro.preco * item.quantidade
+        return item.preco * item.quantidade
 
     class Meta:
         model = ItensCompra
@@ -78,6 +73,7 @@ class CompraCreateUpdateSerializer(ModelSerializer):
         itens = validated_data.pop('itens')
         compra = Compra.objects.create(**validated_data)
         for item in itens:
+            item['preco'] = item['livro'].preco
             ItensCompra.objects.create(compra=compra, **item)
         return compra
 
@@ -87,6 +83,7 @@ class CompraCreateUpdateSerializer(ModelSerializer):
         if itens is not None:
             compra.itens.all().delete()
             for item in itens:
+                item['preco'] = item['livro'].preco
                 ItensCompra.objects.create(compra=compra, **item)
         return super().update(compra, validated_data)
 
