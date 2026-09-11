@@ -2,7 +2,6 @@ from django.db import transaction
 from rest_framework.serializers import (
     CharField,
     CurrentUserDefault,
-    DecimalField,
     HiddenField,
     ModelSerializer,
     SerializerMethodField,
