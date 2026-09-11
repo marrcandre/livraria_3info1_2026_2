@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from .livro import Livro
 from .user import User
@@ -13,6 +14,7 @@ class Compra(models.Model):
 
     usuario = models.ForeignKey(User, on_delete=models.PROTECT, related_name='compras')
     status = models.IntegerField(choices=StatusCompra.choices, default=StatusCompra.CARRINHO)
+    data = models.DateTimeField(auto_now_add=True)
 
     @property
     def total(self):
